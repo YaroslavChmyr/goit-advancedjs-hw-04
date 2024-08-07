@@ -4,8 +4,6 @@ import 'simplelightbox/dist/simple-lightbox.min.css';
 export function renderGallery(imgArray) {
   const gallery = document.querySelector('.gallery');
 
-  gallery.innerHTML = '';
-
   const imageItems = imgArray
     .map(image => {
       return `<li class="gallery-item">
