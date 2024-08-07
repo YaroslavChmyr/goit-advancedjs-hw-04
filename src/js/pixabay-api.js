@@ -25,8 +25,7 @@ export async function searchRequest(searchQuery) {
   try {
     const response = await axios.get(url);
     const data = response.data;
-    const hits = data.hits;
-    return hits;
+    return data;
   } catch (error) {
     console.log(error);
   } finally {
@@ -61,8 +60,7 @@ export async function loadMoreImages(searchQuery) {
   try {
     const response = await axios.get(url);
     const data = response.data;
-    const hits = data.hits;
-    return hits;
+    return data;
   } catch (error) {
     console.log(error);
   } finally {
