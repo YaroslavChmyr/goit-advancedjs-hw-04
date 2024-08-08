@@ -11,9 +11,11 @@ let searchData = '';
 let imgCount = 0;
 let totalImages = 0;
 
-form.addEventListener('submit', event => {
+form.addEventListener('submit', async event => {
   event.preventDefault();
+
   searchData = document.querySelector('.search-input').value.trim();
+
   if (searchData === '') {
     iziToast.error({
       id: 'error',
@@ -23,34 +25,36 @@ form.addEventListener('submit', event => {
     });
     gallery.innerHTML = '';
   } else {
-    searchRequest(searchData)
-      .then(data => {
-        console.log(data);
-        if (data.hits.length === 0) {
-          iziToast.error({
-            id: 'error',
-            message:
-              'Sorry, there are no images matching your search query. Please try again!',
-            position: 'topRight',
-            transitionIn: 'fadeInDown',
-          });
-        } else {
-          gallery.innerHTML = '';
-          renderGallery(data.hits);
-          loadMoreButton.style.display = 'block';
-          totalImages = data.totalHits;
-          imgCount = data.hits.length;
-        }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-      });
+    try {
+      const data = await searchRequest(searchData);
+      console.log(data);
+
+      if (data.hits.length === 0) {
+        iziToast.error({
+          id: 'error',
+          message:
+            'Sorry, there are no images matching your search query. Please try again!',
+          position: 'topRight',
+          transitionIn: 'fadeInDown',
+        });
+        gallery.innerHTML = '';
+      } else {
+        gallery.innerHTML = '';
+        renderGallery(data.hits);
+        loadMoreButton.style.display = 'block';
+        totalImages = data.totalHits;
+        imgCount = data.hits.length;
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
   }
 });
 
-loadMoreButton.addEventListener('click', event => {
+loadMoreButton.addEventListener('click', async event => {
   event.preventDefault();
-  if (imgCount > totalImages) {
+
+  if (imgCount >= totalImages) {
     iziToast.error({
       id: 'error',
       message: "We're sorry, but you've reached the end of search results.",
@@ -59,16 +63,20 @@ loadMoreButton.addEventListener('click', event => {
     });
     loadMoreButton.style.display = 'none';
   } else {
-    loadMoreImages(searchData)
-      .then(data => {
-        renderGallery(data.hits);
-        imgCount += data.hits.length;
-        const galleryItem = document.querySelector('.gallery-item');
-        const rect = galleryItem.getBoundingClientRect();
-        window.scrollBy(0, 2 * rect.height);
-      })
-      .catch(error => {
-        console.error('Error:', error);
+    try {
+      const data = await loadMoreImages(searchData);
+      renderGallery(data.hits);
+      imgCount += data.hits.length;
+
+      const galleryItem = document.querySelector('.gallery-item');
+      const rect = galleryItem.getBoundingClientRect();
+      window.scrollBy({
+        top: 2 * rect.height + 24,
+        left: 0,
+        behavior: 'smooth',
       });
+    } catch (error) {
+      console.error('Error:', error);
+    }
   }
 });
